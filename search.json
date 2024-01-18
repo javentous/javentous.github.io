@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "qr-test",
+    "section": "",
+    "text": "Test of creating a dynamic QR Code using shinylive which is python compiled to wasm locally on the client browser.\n\n#| label: qr-ex-py-interactive22\n#| standalone: true\n#| components: [editor, viewer]\n#| viewerHeight: 420\n## file: app.py\n\nfrom shiny import *\nfrom shiny.types import ImgData\nimport matplotlib.pyplot as plt\nimport random, io, string\nimport segno\n\ndef unique_id(length): \n    raw = ''.join([string.ascii_uppercase, string.ascii_lowercase, string.digits])\n    strid = ''.join(random.choice(raw) for _ in range(length))\n    return(strid)\n\n\napp_ui = ui.page_fluid(\n    ui.markdown(\n        \"\"\"\n        This will take a URL and add a random string called UniqueID\n        It'll also create the corresponding QR Code for the new URL\n\n        First how long do you want the UniqueID to be?\n        \"\"\"\n    ),\n    ui.input_slider(\"n\", \"N\", 3, 10, 4),\n    ui.input_text(\"m\", \"URL\", placeholder=\"Enter URL\"),\n    ui.output_text_verbatim(\"txt\"),\n    ui.output_image(\"qr\", inline=True),\n)\n\n\ndef server(input, output, session):\n    @output\n    @render.text\n    def txt():\n        return f\"Here is ya URL:\\n{input.m() + unique_id(input.n())}\"\n    #@reactive.event(input.cr, ignore_none=False)\n    @output\n    @render.image\n    def qr():\n        qrcode = segno.make((input.m() + unique_id(input.n())), micro=False)\n        qrcode.save(\"testy.svg\")\n        img: ImgData = {\"src\": str(\"testy.svg\"), \"width\": \"200px\"}\n        return img\n        \napp = App(app_ui, server)\n\n## file: requirements.txt\nsegno"
+  }
+]
